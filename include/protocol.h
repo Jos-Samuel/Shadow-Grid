@@ -1,0 +1,28 @@
+#ifndef PROTOCOL_H
+#define PROTOCOL_H
+
+#define CMD_JOIN   "TYPE:JOIN"
+#define CMD_MOVE   "TYPE:MOVE"
+#define CMD_SHOOT  "TYPE:SHOOT"
+#define CMD_STATUS "TYPE:STATUS"
+#define CMD_QUIT   "TYPE:QUIT"
+
+#define RESP_OK    "RESP:OK"
+#define RESP_ERR   "RESP:ERR"
+
+typedef enum {
+    EVENT_JOIN,
+    EVENT_MOVE,
+    EVENT_SHOOT,
+    EVENT_ROLE,
+    EVENT_STATUS,
+    EVENT_RESPAWN,
+    EVENT_QUIT,
+    EVENT_UNKNOWN
+} EventType;
+
+#define ROLE_PLAYER 0
+#define ROLE_SPECTATOR 1
+#define ROLE_ADMIN 2
+
+#endif

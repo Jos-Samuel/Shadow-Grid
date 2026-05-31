@@ -1,0 +1,18 @@
+# Compiled binaries
+server
+client
+replay
+wal_clr
+*_app
+*_test
+test_parse
+test_parse2
+*.out
+*.o
+
+# Runtime generated files
+*.log
+*.dat
+
+# OS generated files
+.DS_Store

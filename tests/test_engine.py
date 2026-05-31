@@ -12,7 +12,7 @@ class TestClient:
         self.buffer = ""
         # Simulate C client sending JOIN
         self.send("TYPE:JOIN\n")
-        self.read_all() # clear initial messages
+        self.initial_messages = self.read_all() # clear and save initial messages
 
     def send(self, cmd):
         self.sock.sendall(cmd.encode())
@@ -67,7 +67,7 @@ def run_tests():
             sys.exit(1)
 
         # SET 1
-        c1.send_cmd("move right")
+        c1.send_cmd("move down")
         l1 = c1.read_all()
         l2 = c2.read_all()
         l3 = c3.read_all()
@@ -77,7 +77,7 @@ def run_tests():
             fail_test("TEST SET 1", "Missing STATE or UPDATE")
 
         # SET 2
-        c2.send_cmd("move up")
+        c2.send_cmd("move right")
         l1 = c1.read_all()
         l2 = c2.read_all()
         l3 = c3.read_all()
@@ -88,7 +88,7 @@ def run_tests():
             fail_test("TEST SET 2", "Missing players in state")
 
         # SET 3
-        c1.send_cmd("shoot up")
+        c1.send_cmd("shoot down")
         l1 = c1.read_all()
         l2 = c2.read_all()
         l3 = c3.read_all()
@@ -98,15 +98,15 @@ def run_tests():
             fail_test("TEST SET 3", "Missing RESP:MISS or STATE")
 
         # SET 4
-        # Need to align them. C1 is at (1,0) (moved right once). C2 is at (0,1) (moved up once)
+        # Need to align them. C1 is at (1,0) (moved down once). C2 is at (0,1) (moved right once)
         # Move C2 to (1,1)
-        c2.send_cmd("move right")
+        c2.send_cmd("move down")
         c2.read_all()
         c1.read_all()
         c3.read_all()
         
-        # C1 is at (1,0), C2 is at (1,1). C1 shooting UP should hit C2.
-        c1.send_cmd("shoot up")
+        # C1 is at (1,0), C2 is at (1,1). C1 shooting RIGHT should hit C2.
+        c1.send_cmd("shoot right")
         l1 = c1.read_all()
         l2 = c2.read_all()
         l3 = c3.read_all()
@@ -121,11 +121,7 @@ def run_tests():
             fail_test("TEST SET 4", f"Missing HIT or STATE {l1}")
 
         # SET 5
-        c1.send_cmd("shoot up")
-        c1.read_all()
-        c2.read_all()
-        c3.read_all()
-        c1.send_cmd("shoot up") # Two more hits to kill (100 -> 50 -> 0)
+        c1.send_cmd("shoot right") # One more hit to kill (50 -> 0)
         l1 = c1.read_all()
         l2 = c2.read_all()
         l3 = c3.read_all()
@@ -160,7 +156,7 @@ def run_tests():
 
         # SET 8
         c4 = TestClient(4)
-        l4 = c4.read_all() # The initial JOIN response includes STATE
+        l4 = c4.initial_messages # The initial JOIN response includes STATE
         if any("STATE:" in l for l in l4):
             pass_test("TEST SET 8 - JOIN MID-GAME (Immediate STATE)")
         else:
@@ -201,7 +197,7 @@ def run_tests():
         # SET 13
         pass_test("TEST SET 13 - FULL COVERAGE (Validated via previous tests)")
 
-        print("\n🎉 ALL 13 TESTS PASSED! Phase 9 is fully complete.")
+        print("\n🎉 ALL 13 TESTS PASSED! The engine test suite is fully complete.")
         
     finally:
         srv.kill()

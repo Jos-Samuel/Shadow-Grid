@@ -18,6 +18,11 @@ typedef enum {
     EVENT_STATUS,
     EVENT_RESPAWN,
     EVENT_QUIT,
+    EVENT_KICK,
+    EVENT_HEAL_ALL,
+    EVENT_SMITE,
+    EVENT_CREATE_SQUAD,
+    EVENT_INVITE,
     EVENT_UNKNOWN
 } EventType;
 

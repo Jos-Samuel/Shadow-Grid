@@ -64,7 +64,17 @@ int main() {
             char *line = strtok(buffer, "\n");
             while (line != NULL) {
                 if (strncmp(line, "STATE:", 6) == 0) {
-                    printf("\n[STATE] %s\n", line);
+                    printf("\n[STATE] ");
+                    for (int i = 6; line[i] != '\0'; i++) {
+                        if (line[i] == '|') {
+                            if (line[i+1] != '\0') {
+                                printf("\n        ");
+                            }
+                        } else {
+                            putchar(line[i]);
+                        }
+                    }
+                    printf("\n");
                 } else if (strncmp(line, "UPDATE:", 7) == 0) {
                     printf("\n[UPDATE] %s\n", line);
                 } else {
@@ -92,9 +102,15 @@ int main() {
             } else if (strncmp(input, "role ", 5) == 0) {
                 char msg[BUFFER_SIZE];
                 input[strcspn(input, "\n")] = '\0';
-                char *role = input + 5;
+                char *args = input + 5;
+                char *role_name = strtok(args, " ");
+                char *pass = strtok(NULL, " ");
 
-                snprintf(msg, sizeof(msg), "TYPE:ROLE;SET:%s\n", role);
+                if (pass != NULL) {
+                    snprintf(msg, sizeof(msg), "TYPE:ROLE;SET:%s;PASS:%s\n", role_name, pass);
+                } else {
+                    snprintf(msg, sizeof(msg), "TYPE:ROLE;SET:%s\n", role_name);
+                }
                 send(sock, msg, strlen(msg), 0);
 
             } else if (strncmp(input, "shoot ", 6) == 0) {
@@ -104,6 +120,8 @@ int main() {
 
                 if (strlen(dir) == 0) {
                     printf("Usage: shoot up|down|left|right\n");
+                    printf("Enter command: ");
+                    fflush(stdout);
                     continue;
                 }
 
@@ -120,8 +138,41 @@ int main() {
                 send(sock, "TYPE:QUIT\n", 10, 0);
                 break;
 
+            } else if (strncmp(input, "kick ", 5) == 0) {
+                char msg[BUFFER_SIZE];
+                input[strcspn(input, "\n")] = '\0';
+                char *tgt = input + 5;
+                snprintf(msg, sizeof(msg), "TYPE:KICK;TARGET:%s\n", tgt);
+                send(sock, msg, strlen(msg), 0);
+
+            } else if (strncmp(input, "smite ", 6) == 0) {
+                char msg[BUFFER_SIZE];
+                input[strcspn(input, "\n")] = '\0';
+                char *tgt = input + 6;
+                snprintf(msg, sizeof(msg), "TYPE:SMITE;TARGET:%s\n", tgt);
+                send(sock, msg, strlen(msg), 0);
+
+            } else if (strncmp(input, "heal_all", 8) == 0) {
+                send(sock, "TYPE:HEAL_ALL\n", 14, 0);
+
+            } else if (strncmp(input, "invite ", 7) == 0) {
+                char msg[BUFFER_SIZE];
+                input[strcspn(input, "\n")] = '\0';
+                char *tgt = input + 7;
+                snprintf(msg, sizeof(msg), "TYPE:INVITE;TARGET:%s\n", tgt);
+                send(sock, msg, strlen(msg), 0);
+
+            } else if (strncmp(input, "create_squad ", 13) == 0) {
+                char msg[BUFFER_SIZE];
+                input[strcspn(input, "\n")] = '\0';
+                char *tgts = input + 13;
+                snprintf(msg, sizeof(msg), "TYPE:CREATE_SQUAD;TARGETS:%s\n", tgts);
+                send(sock, msg, strlen(msg), 0);
+
             } else {
                 printf("Invalid command\n");
+                printf("Enter command: ");
+                fflush(stdout);
             }
         }
     }

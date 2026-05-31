@@ -6,6 +6,17 @@
 #include "common.h"
 
 Player players[MAX_PLAYERS];
+pthread_mutex_t player_locks[MAX_PLAYERS];
+int WFG[MAX_PLAYERS][MAX_PLAYERS];
+int deadlock_abort[MAX_PLAYERS];
+
+void init_locks() {
+    for (int i = 0; i < MAX_PLAYERS; i++) {
+        pthread_mutex_init(&player_locks[i], NULL);
+        deadlock_abort[i] = 0;
+        for (int j = 0; j < MAX_PLAYERS; j++) WFG[i][j] = 0;
+    }
+}
 
 int count_active_players() {
     int count = 0;
@@ -25,6 +36,7 @@ int register_player() {
             players[i].health = 100;
             players[i].score = 0;
             players[i].role = ROLE_PLAYER;
+            players[i].squad_id = -1;
             return i;
         }
     }
@@ -34,6 +46,12 @@ int register_player() {
 void remove_player(int id) {
     if (id >= 0 && id < MAX_PLAYERS) {
         players[id].active = 0;
+        players[id].squad_id = -1;  // Prevent squad_id leaking to a reused slot
+        // Clear all WFG edges involving this player to prevent stale deadlock detection
+        for (int j = 0; j < MAX_PLAYERS; j++) {
+            WFG[id][j] = 0;
+            WFG[j][id] = 0;
+        }
     }
 }
 
